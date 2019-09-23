@@ -1,20 +1,25 @@
 import os
 from dotenv import load_dotenv
 import sendgrid
-from sendgrid.helpers.mail import *
+from sendgrid.helpers.mail import Mail
 
 
 def send_email(from_email, from_name, to_email, subject, content):
-	sg = sendgrid.SendGridAPIClient(apikey=os.getenv('SENDGRID_API_KEY'))
-	from_email = Email(from_email, from_name)
-	to_email = Email(to_email)
-	subject = subject
-	content = Content('text/plain', content)
-	mail = Mail(from_email, subject, to_email, content)
-	response = sg.client.mail.send.post(request_body=mail.get())
-	print(response.status_code)
-	print(response.body)
-	print(response.headers)
+	message = Mail(
+        from_email=from_email,
+        to_emails=to_email,
+        subject=subject,
+        html_content=content
+    )
+
+	try:
+		sg = sendgrid.SendGridAPIClient(apikey=os.getenv('SENDGRID_API_KEY'))
+		response = sg.send(message)
+		print(response.status_code)
+		print(response.body)
+		print(response.headers)
+	except Exception as e:
+		print(str(e))
 
 
 if __name__ == '__main__':
